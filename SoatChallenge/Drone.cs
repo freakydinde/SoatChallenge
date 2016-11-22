@@ -169,6 +169,16 @@
             }
         }
 
+        /// <summary>reset current route, set state back to pending</summary>
+        public void Reset()
+        {
+            this.Route.Reset();
+            this.Route = null;
+            this.CurrentState = State.Pending;
+            this.moves = new List<int>();
+            this.Round = 0;
+        }
+
         /// <summary>define a route for this drone, add route packet</summary>
         /// <param name="route">route to set</param>
         public void SetRoute(Route route)
@@ -181,16 +191,6 @@
                 this.RouteCells = this.Route.Cells.GetEnumerator();
                 this.CurrentState = State.Ready;
             }
-        }
-
-        /// <summary>reset current route, set state back to pending</summary>
-        public void Reset()
-        {
-            this.Route.Reset();
-            this.Route = null;
-            this.CurrentState = State.Pending;
-            this.moves = new List<int>();
-            this.Round = 0;
         }
 
         /// <summary>start current drone</summary>

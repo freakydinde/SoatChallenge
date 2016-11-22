@@ -54,7 +54,7 @@
             actual.Append(gridPacket.CurrentState.ToString() + ";");
             actual.Append(gridPacket.Distance + ";");
 
-            currentRoute.AddRoute(newRoute, false);
+            currentRoute.AddRoute(newRoute);
 
             actual.Append(gridPacket.CurrentState.ToString() + ";");
             actual.Append(gridPacket.Distance + ";");

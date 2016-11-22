@@ -50,7 +50,7 @@
 
             /// <summary>add a sleep round (at start) to delay cell passage so packet can be delivered from initial shipper (group 3)</summary>
             Wait = 64,
-            
+
             /// <summary>return null if you can't follow "never" specs, if this flag is not set rules can be broken (group 3)</summary>
             Pure = 128
         }
@@ -116,7 +116,7 @@
                 {
                     this.cells.Insert(0, routeCell);
 
-                    foreach(Packet routePacket in this.packets)
+                    foreach (Packet routePacket in this.packets)
                     {
                         routePacket.Distance++;
                     }
@@ -146,7 +146,7 @@
         /// <summary>Merge a route with this route</summary>
         /// <param name="route">route to merge</param>
         /// <param name="bubbling">true : merge only Willing packet (bubble mode)</param>
-        public void AddRoute(Route route, bool bubbling)
+        public void AddRoute(Route route)
         {
             if (route != null)
             {
@@ -164,7 +164,7 @@
                     this.cells.AddRange(route.Cells.Except(stayCells));
                     this.cells.InsertRange(0, stayCells);
 
-                    foreach(Packet packet in this.packets)
+                    foreach (Packet packet in this.packets)
                     {
                         packet.Distance += stayCells.Count();
                     }

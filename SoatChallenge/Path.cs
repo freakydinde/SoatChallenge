@@ -73,7 +73,7 @@
         }
 
         /// <summary>Gets the fartest packet as path</summary>
-        public Path FartestPendingPath(ICell startCell)
+        public Path FarthestPendingPath(ICell startCell)
         {
             return (from i in this.Grid.PendingPackets select new Path(i, this.Grid, startCell)).OrderByDescending(x => x.Distance).FirstOrDefault();
         }
@@ -89,7 +89,7 @@
         /// <summary>Gets first route corresponding to routeSpecs list</summary>
         /// <param name="routeSpecs">route specifications list</param>
         /// <returns>Route corresponding to specs</returns>
-        public Route MapBubbleRoute(List<Route.Specs> routesSpecs)
+        public Route MapBubbleRoute(IEnumerable<Route.Specs> routesSpecs)
         {
             Write.Trace($"map Bubble route, from {this.StartCell} to {this.ReachCell}");
 
@@ -123,7 +123,7 @@
                         {
                             nextRoute.AssignWilling();
 
-                            route.AddRoute(nextRoute, true);
+                            route.AddRoute(nextRoute);
                         }
                         else
                         {
@@ -165,7 +165,7 @@
         /// <summary>Gets first route corresponding to routeSpecs list</summary>
         /// <param name="routeSpecs">route specifications</param>
         /// <returns>Route corresponding to specs</returns>
-        public Route MapRoute(List<Route.Specs> routeSpecs)
+        public Route MapRoute(IEnumerable<Route.Specs> routeSpecs)
         {
             Route route = this.GetRoute(routeSpecs);
             route?.AssignWilling();
@@ -251,7 +251,7 @@
             }
         }
 
-        private Route GetRoute(List<Route.Specs> routesSpecs)
+        private Route GetRoute(IEnumerable<Route.Specs> routesSpecs)
         {
             foreach (Route.Specs currentRouteSpecs in routesSpecs)
             {
@@ -345,11 +345,7 @@
                 if (cell.IsPacket)
                 {
                     int nextDistance = route.Distance + 1;
-
-                    Packet packet = this.Grid.GetPacket(cell);
                     cell.IsPacket = this.Grid.IsAvailablePacket(cell, nextDistance);
-
-                    // Write.Trace($"initial packet : {packet}, state {packet.CurrentState}, with distance {nextDistance} IsPacket will be set to {cell.IsPacket}");
                 }
 
                 if (cell.Row < 0 || cell.Row > this.Grid.Rows)

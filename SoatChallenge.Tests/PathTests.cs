@@ -108,54 +108,6 @@
         }
 
         [TestMethod]
-        public void RouteWait()
-        {
-            string editedExampleFile = System.IO.Path.Combine(Environment.CurrentDirectory, "newExample.txt");
-            if (System.IO.File.Exists(editedExampleFile)) System.IO.File.Delete(editedExampleFile);
-            System.IO.File.Copy(Inputs.ExampleInput, editedExampleFile);
-            System.IO.File.AppendAllText(editedExampleFile, $"{Environment.NewLine}9 13{Environment.NewLine}9 12{Environment.NewLine}8 11");
-
-            Delivery delivery = Delivery.CreateDelivery(editedExampleFile, 4, 10);
-
-            Cell dp = new Cell(8, 11);
-            Cell ap = new Cell(8, 12);
-            Cell cp = new Cell(9, 12);
-            Cell bp = new Cell(9, 13);
-
-            Packet pa = delivery.Grid.GetPacket(ap);
-            delivery.Grid.SetPacketState(ap, Packet.State.Assigned);
-            delivery.Grid.SetPacketDistance(ap, 0);
-
-            Packet pb = delivery.Grid.GetPacket(bp);
-            delivery.Grid.SetPacketState(bp, Packet.State.Assigned);
-            delivery.Grid.SetPacketDistance(bp, 5);
-
-            Packet pc = delivery.Grid.GetPacket(cp);
-            delivery.Grid.SetPacketState(cp, Packet.State.Assigned);
-            delivery.Grid.SetPacketDistance(cp, 5);
-
-            Packet pd = delivery.Grid.GetPacket(dp);
-            delivery.Grid.SetPacketState(dp, Packet.State.Assigned);
-            delivery.Grid.SetPacketDistance(dp, 5);
-
-            Write.Trace($"{pa}, state : {pa.CurrentState}");
-            Write.Trace($"{pb}, state : {pb.CurrentState}");
-            Write.Trace($"{pc}, state : {pc.CurrentState}");
-            Write.Trace($"{pd}, state : {pd.CurrentState}");
-
-            Path path = new Path(new Cell(16, 7), delivery.Grid, new Cell(8, 13));
-
-            Route route = path.MapRoute(Route.Specs.Free | Route.Specs.Wait);
-
-            string actual = route.ToString();
-
-            Write.Trace(actual);
-
-            string expected = "StartCell:R8C13 ReachCell:R16C7 Cells:R8C13(Stay);R8C13(Stay);R8C13(Stay);R8C13(Stay);R8C12(Left);R9C12(Down);R10C12(Down);R11C12(Down);R12C12(Down);R13C12(Down);R14C12(Down);R15C12(Down);R16C12(Down);R16C11(Left);R16C10(Left);R16C9(Left);R16C8(Left);R16C7(Left) Packets:R16C7(18) MaxPackets:4 Distance:18";
-            Assert.AreEqual(expected, actual);
-        }
-
-        [TestMethod]
         public void RouteOnMapBubbleWithStart()
         {
             Delivery delivery = Delivery.CreateDelivery(Inputs.ExampleInput, 4, 10);
@@ -223,6 +175,54 @@
             expected.AppendLine("StartCell:R4C16 ReachCell:R16C7 Cells:R4C17(Right);R5C17(Down);R6C17(Down);R7C17(Down);R8C17(Down);R9C17(Down);R10C17(Down);R11C17(Down);R12C17(Down);R13C17(Down);R14C17(Down);R15C17(Down);R16C17(Down);R16C18(Right);R16C19(Right);R16C0(Right);R16C1(Right);R16C2(Right);R16C3(Right);R16C4(Right);R16C5(Right);R16C6(Right);R16C7(Right) Packets:R14C17(11);R16C7(23) MaxPackets:3 Distance:23");
 
             Assert.AreEqual(expected.ToString(), actual.ToString());
+        }
+
+        [TestMethod]
+        public void RouteWait()
+        {
+            string editedExampleFile = System.IO.Path.Combine(Environment.CurrentDirectory, "newExample.txt");
+            if (System.IO.File.Exists(editedExampleFile)) System.IO.File.Delete(editedExampleFile);
+            System.IO.File.Copy(Inputs.ExampleInput, editedExampleFile);
+            System.IO.File.AppendAllText(editedExampleFile, $"{Environment.NewLine}9 13{Environment.NewLine}9 12{Environment.NewLine}8 11");
+
+            Delivery delivery = Delivery.CreateDelivery(editedExampleFile, 4, 10);
+
+            Cell dp = new Cell(8, 11);
+            Cell ap = new Cell(8, 12);
+            Cell cp = new Cell(9, 12);
+            Cell bp = new Cell(9, 13);
+
+            Packet pa = delivery.Grid.GetPacket(ap);
+            delivery.Grid.SetPacketState(ap, Packet.State.Assigned);
+            delivery.Grid.SetPacketDistance(ap, 0);
+
+            Packet pb = delivery.Grid.GetPacket(bp);
+            delivery.Grid.SetPacketState(bp, Packet.State.Assigned);
+            delivery.Grid.SetPacketDistance(bp, 5);
+
+            Packet pc = delivery.Grid.GetPacket(cp);
+            delivery.Grid.SetPacketState(cp, Packet.State.Assigned);
+            delivery.Grid.SetPacketDistance(cp, 5);
+
+            Packet pd = delivery.Grid.GetPacket(dp);
+            delivery.Grid.SetPacketState(dp, Packet.State.Assigned);
+            delivery.Grid.SetPacketDistance(dp, 5);
+
+            Write.Trace($"{pa}, state : {pa.CurrentState}");
+            Write.Trace($"{pb}, state : {pb.CurrentState}");
+            Write.Trace($"{pc}, state : {pc.CurrentState}");
+            Write.Trace($"{pd}, state : {pd.CurrentState}");
+
+            Path path = new Path(new Cell(16, 7), delivery.Grid, new Cell(8, 13));
+
+            Route route = path.MapRoute(Route.Specs.Free | Route.Specs.Wait);
+
+            string actual = route.ToString();
+
+            Write.Trace(actual);
+
+            string expected = "StartCell:R8C13 ReachCell:R16C7 Cells:R8C13(Stay);R8C13(Stay);R8C13(Stay);R8C13(Stay);R8C12(Left);R9C12(Down);R10C12(Down);R11C12(Down);R12C12(Down);R13C12(Down);R14C12(Down);R15C12(Down);R16C12(Down);R16C11(Left);R16C10(Left);R16C9(Left);R16C8(Left);R16C7(Left) Packets:R16C7(18) MaxPackets:4 Distance:18";
+            Assert.AreEqual(expected, actual);
         }
     }
 }

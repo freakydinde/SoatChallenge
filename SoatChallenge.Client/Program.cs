@@ -8,9 +8,10 @@
     /// <summary>Entry point for soat challenge client</summary>
     internal class Program
     {
+        private const int AutonomyRatio = 40;
+
         // constante
         private const int DronesMaxPacket = 4;
-        private const int AutonomyRatio = 40;
 
         private static void Main()
         {
@@ -24,7 +25,7 @@
             // log delivery
             string filePath = Path.Combine(Environment.CurrentDirectory, delivery.Score() + ".txt");
             File.WriteAllLines(filePath, delivery.DronesMoves);
-            
+
             Write.Print($"press l for more loggin, any other key to exit");
 
             ConsoleKeyInfo key = Console.ReadKey();
@@ -56,11 +57,11 @@
 
             List<string> shippingErrors = new List<string>();
 
-            foreach(Route route in routes)
+            foreach (Route route in routes)
             {
                 IEnumerable<RouteCell> routeCells = from i in route.Cells.Where(x => x.Direction != Drone.Direction.Stay) where packets.Where(x => x.Row == i.Row && x.Column == i.Column).Count() > 0 select i;
 
-                foreach(RouteCell cell in routeCells)
+                foreach (RouteCell cell in routeCells)
                 {
                     int cellDistance = route.CellDistance(cell);
                     Packet packet = packets.Where(x => x.Row == cell.Row && x.Column == cell.Column).First();

@@ -121,18 +121,10 @@
             return new Delivery(grid, drones.Distinct(), roundsNumber, packetsNumber, maxDistance, dronesMaxPackets, autonomyRatio);
         }
 
-        private void ResetPackets(IEnumerable<ICell> packets)
-        {
-            foreach(ICell cell in packets)
-            {
-                this.Grid.SetPacketState(cell, Packet.State.Pending);
-            }
-        }
-
         /// <summary>try to set a route to all drones</summary>
         public void MapRoutes()
         {
-            List <Route.Specs> routesSpecs = new List<Route.Specs>() { Route.Specs.Free | Route.Specs.Pure, Route.Specs.All | Route.Specs.Pure, Route.Specs.All | Route.Specs.Pure | Route.Specs.Alternative };
+            List<Route.Specs> routesSpecs = new List<Route.Specs>() { Route.Specs.Free | Route.Specs.Pure, Route.Specs.All | Route.Specs.Pure, Route.Specs.All | Route.Specs.Pure | Route.Specs.Alternative };
             List<Cell> missingCells = MapRouteWhile(routesSpecs, true);
 
             if (missingCells.Any())
@@ -154,45 +146,6 @@
 
                 missingCells = MapRouteWhile(routesSpecs, false);
             }
-        }
-
-        private List<Cell> MapRouteWhile(List<Route.Specs> routesSpecs, bool bubble)
-        {
-            List<Cell> missingCells = new List<Cell>();
-
-            while (this.Grid.PendingPacketsNumber > 0 && this.PendingDrones.Count() > 0)
-            {
-                Path path = new Path(this.Grid.StartCell, this.Grid);
-
-                Route route = null;
-
-                if (bubble == true)
-                {
-                    route = path.MapBubbleRoute(routesSpecs);
-                }
-                else
-                {
-                    route = path.MapRoute(routesSpecs);
-                }
-
-                if (route != null)
-                {
-                    this.PendingDrones.FirstOrDefault()?.SetRoute(route);
-
-                    Write.Print($"route mapped : {this.Routes.Count()}, packet assigned : {this.Grid.AssignedPacketsNumber} packets left : {this.Grid.PendingPacketsNumber} missing cells : {missingCells.Count()}, drone left : {this.PendingDrones.Count()}");
-                }
-                else
-                {
-                    Cell missingCell = path.ClosestPendingPath(this.Grid.StartCell).ReachCell;
-                    missingCells.Add(missingCell);
-
-                    this.Grid.SetPacketState(missingCell, Packet.State.Missing);
-
-                    Write.Print($"missing cells : {missingCell} failed to get any route from : {string.Join(" or ", routesSpecs)}");
-                }
-            }
-
-            return missingCells;
         }
 
         /// <summary>Print drones route to a text file</summary>
@@ -266,7 +219,7 @@
             }
 
             // if a drone has moved until last roud, it may stick to shipping state
-            foreach(Drone drone in from i in this.Drones where i.CurrentState == Drone.State.Shipping select i)
+            foreach (Drone drone in from i in this.Drones where i.CurrentState == Drone.State.Shipping select i)
             {
                 drone.CurrentState = Drone.State.Stopped;
             }
@@ -277,6 +230,53 @@
         public override string ToString()
         {
             return Write.Invariant($"PacketsNumber:{this.PacketsNumber} DronesNumber:{this.Drones.Count()} Round:{this.Round} MaxRound:{this.MaxRound} autonomyRatio:{Delivery.autonomyRatio} maxDistance:{Delivery.maxDistance} Drone.MaxPackets:{Drone.MaxPackets} Grid:({this.Grid})");
+        }
+
+        private List<Cell> MapRouteWhile(List<Route.Specs> routesSpecs, bool bubble)
+        {
+            List<Cell> missingCells = new List<Cell>();
+
+            while (this.Grid.PendingPacketsNumber > 0 && this.PendingDrones.Count() > 0)
+            {
+                Path path = new Path(this.Grid.StartCell, this.Grid);
+
+                Route route = null;
+
+                if (bubble == true)
+                {
+                    route = path.MapBubbleRoute(routesSpecs);
+                }
+                else
+                {
+                    route = path.MapRoute(routesSpecs);
+                }
+
+                if (route != null)
+                {
+                    this.PendingDrones.FirstOrDefault()?.SetRoute(route);
+
+                    Write.Print($"route mapped : {this.Routes.Count()}, packet assigned : {this.Grid.AssignedPacketsNumber} packets left : {this.Grid.PendingPacketsNumber} missing cells : {missingCells.Count()}, drone left : {this.PendingDrones.Count()}");
+                }
+                else
+                {
+                    Cell missingCell = path.ClosestPendingPath(this.Grid.StartCell).ReachCell;
+                    missingCells.Add(missingCell);
+
+                    this.Grid.SetPacketState(missingCell, Packet.State.Missing);
+
+                    Write.Print($"missing cells : {missingCell} failed to get any route from : {string.Join(" or ", routesSpecs)}");
+                }
+            }
+
+            return missingCells;
+        }
+
+        private void ResetPackets(IEnumerable<ICell> packets)
+        {
+            foreach (ICell cell in packets)
+            {
+                this.Grid.SetPacketState(cell, Packet.State.Pending);
+            }
         }
     }
 }
