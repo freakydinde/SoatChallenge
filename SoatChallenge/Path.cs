@@ -67,12 +67,16 @@
         public Cell StartCell { get; private set; }
 
         /// <summary>Gets the closest packet as path</summary>
+        /// <param name="startCell">path close from this cell</param>
+        /// <returns>closest packet pending path</returns>
         public Path ClosestPendingPath(ICell startCell)
         {
             return (from i in this.Grid.PendingPackets select new Path(i, this.Grid, startCell)).OrderBy(x => x.Distance).FirstOrDefault();
         }
 
         /// <summary>Gets the fartest packet as path</summary>
+        /// <param name="startCell">path far from this cell</param>
+        /// <returns>farthest pending packet as path</returns>
         public Path FarthestPendingPath(ICell startCell)
         {
             return (from i in this.Grid.PendingPackets select new Path(i, this.Grid, startCell)).OrderByDescending(x => x.Distance).FirstOrDefault();
@@ -87,7 +91,7 @@
         }
 
         /// <summary>Gets first route corresponding to routeSpecs list</summary>
-        /// <param name="routeSpecs">route specifications list</param>
+        /// <param name="routesSpecs">route specifications list</param>
         /// <returns>Route corresponding to specs</returns>
         public Route MapBubbleRoute(IEnumerable<Route.Specs> routesSpecs)
         {
@@ -196,6 +200,11 @@
                     {
                         returnList = from i in nextDirections where i.IsRoute == true select i;
                     }
+
+                    if (!returnList.Any())
+                    {
+                        returnList = from i in nextDirections where i.IsStartRoute == true select i;
+                    }
                 }
                 else if (routeSpecs.HasFlag(Route.Specs.Free))
                 {
@@ -250,7 +259,7 @@
 
                 Write.Trace($"map {routeSpecs} route, from {this.StartCell} to {this.ReachCell}");
 
-                while (route.ReachCell.Row != this.ReachCell.Row || route.ReachCell.Column != this.ReachCell.Column && route != null)
+                while ((route.ReachCell.Row != this.ReachCell.Row || route.ReachCell.Column != this.ReachCell.Column) && route != null)
                 {
                     RouteCell nextDirection = this.NextDirection(route, routeSpecs);
 

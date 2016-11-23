@@ -28,6 +28,7 @@
                 this.IsPacket = grid.IsPacket(this);
                 this.IsRoute = grid.IsRoute(this);
                 this.IsFree = grid.IsFree(this);
+                this.IsStartRoute = grid.IsStartRoute(this);
             }
         }
 
@@ -43,8 +44,11 @@
         /// <summary>Gets or sets a value indicating whether the cell contains a packet</summary>
         public bool IsPacket { get; set; }
 
-        /// <summary>Gets or sets a value indicating whether the routeCells belongs to grid routes (delimited by packets (+ startcell) row and column)</summary>
+        /// <summary>Gets or sets a value indicating whether the routeCells belongs to grid routes (delimited by packets row and column)</summary>
         public bool IsRoute { get; set; }
+
+        /// <summary>Gets or sets a value indicating whether the routeCells belongs to grid start routes (delimited by startcell row and column)</summary>
+        public bool IsStartRoute { get; set; }
 
         /// <summary>Gets or sets a value indicating whether the packet is planned to be delivered after route cell current distance</summary>
         public bool WillBreakDelivery { get; set; }

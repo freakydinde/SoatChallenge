@@ -102,8 +102,6 @@
         /// <param name="grid">grid containing routeCells</param>
         public void AddCell(RouteCell routeCell, Grid grid)
         {
-            // Write.Trace($"Adding routeCell : {routeCell}");
-
             if (routeCell != null && grid != null)
             {
                 if (routeCell.Direction == Drone.Direction.Stay)

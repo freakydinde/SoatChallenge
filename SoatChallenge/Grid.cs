@@ -154,17 +154,18 @@
         /// <returns>bool indicating whether this cell belong to a route</returns>
         public bool IsRoute(ICell cell)
         {
-            if (cell.Row == StartCell.Row || cell.Column == StartCell.Column)
-            {
-                return true;
-            }
-            else
-            {
-                return this.packets.Where(x => x.Row == cell.Row || x.Column == cell.Column).Any();
-            }
+            return this.packets.Where(x => x.Row == cell.Row || x.Column == cell.Column).Any();
         }
 
-        /// <summary>Gets packet corresponding to packet</summary>
+        /// <summary>Gets a bool indicating if that row and column belong to a route</summary>
+        /// <param name="cell">input cell</param>
+        /// <returns>bool indicating whether this cell belong to a route</returns>
+        public bool IsStartRoute(ICell cell)
+        {
+            return cell.Row == this.StartCell.Row || cell.Column == this.StartCell.Column;
+        }
+
+        /// <summary>Reset packet to pending state</summary>
         /// <param name="packet">input packet</param>
         /// <returns>false if input packet is not a real packet</returns>
         public bool ResetPacket(ICell packet)
@@ -181,6 +182,15 @@
             else
             {
                 return false;
+            }
+        }
+
+        /// <summary>Reset packet to pending state</summary>
+        public void ResetMissingPackets()
+        {
+            foreach (Packet packet in this.packets.Where(x => x.CurrentState == Packet.State.Missing))
+            {
+                packet.CurrentState = Packet.State.Pending;
             }
         }
 
@@ -237,11 +247,11 @@
         /// <returns>bool indicating whether packet is an available cell</returns>
         public bool WillBreakDelivery(ICell packet, int distance)
         {
-            Packet testPacket = GetPacket(packet);
+            Packet testPacket = this.GetPacket(packet);
 
             if (testPacket != null)
             {
-                return (testPacket.Distance >= distance);
+                return testPacket.Distance >= distance;
             }
             else
             {

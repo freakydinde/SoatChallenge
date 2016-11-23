@@ -58,7 +58,7 @@
         {
             Console.WriteLine(Write.Invariant(formattable));
 
-            Write.TraceVisible(formattable);
+            Write.Trace(formattable);
         }
 
         /// <summary>send message and collection flatten to string to debug output, using invariant culture</summary>
@@ -89,7 +89,7 @@
         /// <param name="message">initial string</param>
         public static void Trace(string message)
         {
-            System.Diagnostics.Trace.WriteLine(message.ToString(CultureInfo.InvariantCulture));
+            System.Diagnostics.Trace.WriteLine(message?.ToString(CultureInfo.InvariantCulture));
         }
 
         /// <summary>send string to debug output, using invariant culture</summary>
@@ -103,7 +103,7 @@
         /// <param name="formattable">initial string as formattable</param>
         public static void TraceVisible(FormattableString formattable)
         {
-            System.Diagnostics.Trace.Write(Write.Invariant($"{Environment.NewLine}!! {formattable.ToString()}{Environment.NewLine}"));
+            System.Diagnostics.Trace.Write(Write.Invariant($"{Environment.NewLine}!! {formattable?.ToString()}{Environment.NewLine}"));
         }
     }
 }

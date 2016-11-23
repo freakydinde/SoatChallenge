@@ -67,21 +67,5 @@
 
             Assert.AreEqual(expected.ToString(), actual.ToString());
         }
-
-        [TestMethod]
-        public void MoveStringOnMoves()
-        {
-            Delivery ndelivery = Delivery.CreateDelivery(Inputs.ExampleInput, 4, 10);
-
-            Path path = new Path(new Cell(16, 7), ndelivery.Grid);
-
-            ndelivery.MapRoutes();
-            ndelivery.Start();
-
-            string actual = ndelivery.Drones.First().MoveString;
-            string expected = "3 2 2 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 1 4 1 1 1 4 1 0 0 0 0 0";
-
-            Assert.AreEqual(expected, actual);
-        }
     }
 }

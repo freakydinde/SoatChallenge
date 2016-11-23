@@ -122,10 +122,9 @@
         }
 
         /// <summary>try to set a route to all drones</summary>
-        /// <return>Cells which failed to map a route</return>
+        /// <returns>errors cell (packet not mapped)</returns>
         public IEnumerable<Cell> MapRoutes()
         {
-            // following route type will be tried in that order
             List<Route.Specs> routesSpecs = new List<Route.Specs>()
             {
                 Route.Specs.Free,
@@ -138,7 +137,30 @@
                 Route.Specs.All | Route.Specs.Alternative | Route.Specs.Opposite | Route.Specs.Wait
             };
 
-            return MapRouteWhile(routesSpecs, true).Distinct();
+            // optimisation to get all drones delivering
+            if (this.PacketsNumber < this.Drones.Count() * Drone.MaxPackets)
+            {
+                while (this.PacketsNumber < this.Drones.Count() * Drone.MaxPackets)
+                {
+                    Drone.MaxPackets--;
+                }
+
+                int firstShot = (int)Math.Round((double)(this.PacketsNumber - (this.Drones.Count() * Drone.MaxPackets)) / Drone.MaxPackets, 0);
+
+                while ((firstShot * Drone.MaxPackets) + ((this.Drones.Count() - firstShot) * (Drone.MaxPackets + 1)) > this.PacketsNumber)
+                {
+                    firstShot++;
+                }
+
+                this.MapRouteWhile(routesSpecs, firstShot, true);
+
+                Drone.MaxPackets++;
+
+                Write.Print($"optimisation shot mapped {this.Routes.Count()} routes");
+            }
+
+            // standard behaviors
+            return this.MapRouteWhile(routesSpecs, 0, true);
         }
 
         /// <summary>Print drones route to a text file</summary>
@@ -212,7 +234,7 @@
                 Write.Trace($"current round : {this.Round}");
             }
 
-            // if a drone has moved until last roud, it may stick to shipping state
+            // if a drone has moved until last round, it may stick to shipping state
             foreach (Drone drone in from i in this.Drones where i.CurrentState == Drone.State.Shipping select i)
             {
                 drone.CurrentState = Drone.State.Stopped;
@@ -226,11 +248,16 @@
             return Write.Invariant($"PacketsNumber:{this.PacketsNumber} DronesNumber:{this.Drones.Count()} Round:{this.Round} MaxRound:{this.MaxRound} autonomyRatio:{Delivery.autonomyRatio} maxDistance:{Delivery.maxDistance} Drone.MaxPackets:{Drone.MaxPackets} Grid:({this.Grid})");
         }
 
-        private List<Cell> MapRouteWhile(List<Route.Specs> routesSpecs, bool bubble)
+        private List<Cell> MapRouteWhile(List<Route.Specs> routesSpecs, int routesCountLimit, bool bubble)
         {
+            if (routesCountLimit == 0)
+            {
+                routesCountLimit = this.PacketsNumber;
+            }
+
             List<Cell> missingCells = new List<Cell>();
 
-            while (this.Grid.PendingPacketsNumber > 0 && this.PendingDrones.Count() > 0)
+            while (this.Grid.PendingPacketsNumber > 0 && this.PendingDrones.Count() > 0 && routesCountLimit > 0)
             {
                 Path path = new Path(this.Grid.StartCell, this.Grid);
 
@@ -248,20 +275,22 @@
                 if (route != null)
                 {
                     this.PendingDrones.FirstOrDefault()?.SetRoute(route);
+                    routesCountLimit--;
 
                     Write.Print($"route mapped : {this.Routes.Count()}, packet assigned : {this.Grid.AssignedPacketsNumber} packets left : {this.Grid.PendingPacketsNumber} missing cells : {missingCells.Count()}, drone left : {this.PendingDrones.Count()}");
                 }
                 else
                 {
-                    Cell missingCell = path.ClosestPendingPath(this.Grid.StartCell).ReachCell;
-                    missingCells.Add(missingCell);
+                    Cell missingPacket = path.ClosestPendingPath(this.Grid.StartCell).ReachCell;
+                    missingCells.Add(missingPacket);
 
-                    this.Grid.SetPacketState(missingCell, Packet.State.Missing);
+                    this.Grid.SetPacketState(missingPacket, Packet.State.Missing);
 
-                    Write.Print($"missing cells : {missingCell} failed to get any route from : {string.Join(" or ", routesSpecs)}");
+                    Write.Print($"missing cells : {missingPacket} failed to get any route from : {string.Join(" or ", routesSpecs)}");
                 }
             }
 
+            this.Grid.ResetMissingPackets();
             return missingCells;
         }
     }
