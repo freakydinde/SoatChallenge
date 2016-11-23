@@ -191,7 +191,12 @@
         public void RouteWait()
         {
             string editedExampleFile = System.IO.Path.Combine(Environment.CurrentDirectory, "newExample.txt");
-            if (System.IO.File.Exists(editedExampleFile)) System.IO.File.Delete(editedExampleFile);
+
+            if (System.IO.File.Exists(editedExampleFile))
+            {
+                System.IO.File.Delete(editedExampleFile);
+            }
+
             System.IO.File.Copy(Inputs.ExampleInput, editedExampleFile);
             System.IO.File.AppendAllText(editedExampleFile, $"{Environment.NewLine}9 13{Environment.NewLine}9 12{Environment.NewLine}8 11");
 

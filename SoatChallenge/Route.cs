@@ -26,17 +26,17 @@
             Write.Trace($"new Route {this}");
         }
 
-        /// <summary>Sets route specifications, from 3 groups : 1_ Route | Free | All | Bubble 2_ (Default) | Alternative | Opposite 3_ (Default) | Wait | Pure</summary>
+        /// <summary>Sets route specifications, from 3 groups - Route | Free | All - Alternative | Opposite - Wait</summary>
         [Flags]
         public enum Specs
         {
-            /// <summary>try to use route (delimited by column and row (+ startcell) containing packets), try to catch packets, never use free (group 1)</summary>
+            /// <summary>try to use route (delimited by column and row containing packets), try to catch packets (not assigned), never use free (group 1)</summary>
             Route = 1,
 
-            /// <summary>try to go off routes, never take pending or assigned packets (group 1)</summary>
+            /// <summary>try to go off routes, never take packets (group 1)</summary>
             Free = 2,
 
-            /// <summary>use all cells to trace routes, never take pending or assigned packets (group 1)</summary>
+            /// <summary>use all cells to trace routes, never take packets (group 1)</summary>
             All = 4,
 
             /// <summary>always select second choice when multiple path are available (default is choice 1) (group 2)</summary>

@@ -236,7 +236,7 @@
                     }
                     else
                     {
-                        // Route | Free | All | Bubble following specs
+                        // Route | Free | All following specs
                         returnList = returnList.Take(1);
                     }
                 }

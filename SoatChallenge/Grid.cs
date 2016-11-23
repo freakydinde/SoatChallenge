@@ -166,6 +166,15 @@
         }
 
         /// <summary>Reset packet to pending state</summary>
+        public void ResetMissingPackets()
+        {
+            foreach (Packet packet in this.packets.Where(x => x.CurrentState == Packet.State.Missing))
+            {
+                packet.CurrentState = Packet.State.Pending;
+            }
+        }
+
+        /// <summary>Reset packet to pending state</summary>
         /// <param name="packet">input packet</param>
         /// <returns>false if input packet is not a real packet</returns>
         public bool ResetPacket(ICell packet)
@@ -182,15 +191,6 @@
             else
             {
                 return false;
-            }
-        }
-
-        /// <summary>Reset packet to pending state</summary>
-        public void ResetMissingPackets()
-        {
-            foreach (Packet packet in this.packets.Where(x => x.CurrentState == Packet.State.Missing))
-            {
-                packet.CurrentState = Packet.State.Pending;
             }
         }
 
