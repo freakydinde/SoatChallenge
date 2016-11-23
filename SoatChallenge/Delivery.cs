@@ -106,7 +106,7 @@
             int roundsNumber = inputs.ElementAt(1)[3];
 
             Cell startCell = new Cell(inputs.ElementAt(2)[0], inputs.ElementAt(2)[1]);
-            List<Packet> packets = (from i in inputs.Skip(3).Take(inputs.Count() - 3) select new Packet(i.ElementAt(0), i.ElementAt(1))).OrderBy(x => x.Row).ThenBy(x => x.Column).ToList();
+            List<Packet> packets = (from i in inputs.Skip(3) select new Packet(i.ElementAt(0), i.ElementAt(1))).OrderBy(x => x.Row).ThenBy(x => x.Column).ToList();
 
             Grid grid = new Grid(gridRows, gridColumns, packets, startCell);
 
