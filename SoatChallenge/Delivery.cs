@@ -75,7 +75,7 @@
         {
             get
             {
-                return from i in this.Drones where i.CurrentState != Drone.State.Pending select i.Route;
+                return from i in this.Drones where i.Route != null select i.Route;
             }
         }
 
@@ -122,30 +122,23 @@
         }
 
         /// <summary>try to set a route to all drones</summary>
-        public void MapRoutes()
+        /// <return>Cells which failed to map a route</return>
+        public IEnumerable<Cell> MapRoutes()
         {
-            List<Route.Specs> routesSpecs = new List<Route.Specs>() { Route.Specs.Free | Route.Specs.Pure, Route.Specs.All | Route.Specs.Pure, Route.Specs.All | Route.Specs.Pure | Route.Specs.Alternative };
-            List<Cell> missingCells = MapRouteWhile(routesSpecs, true);
-
-            if (missingCells.Any())
+            // following route type will be tried in that order
+            List<Route.Specs> routesSpecs = new List<Route.Specs>()
             {
-                Write.Print($"{missingCells.Count} reach cell failed to get a pure wait path");
+                Route.Specs.Free,
+                Route.Specs.All | Route.Specs.Alternative,
+                Route.Specs.Free | Route.Specs.Wait,
+                Route.Specs.All | Route.Specs.Alternative | Route.Specs.Wait,
+                Route.Specs.Free | Route.Specs.Opposite,
+                Route.Specs.All | Route.Specs.Alternative | Route.Specs.Opposite,
+                Route.Specs.Free | Route.Specs.Opposite | Route.Specs.Wait,
+                Route.Specs.All | Route.Specs.Alternative | Route.Specs.Opposite | Route.Specs.Wait
+            };
 
-                routesSpecs = new List<Route.Specs>() { Route.Specs.All | Route.Specs.Wait, Route.Specs.All | Route.Specs.Alternative | Route.Specs.Wait };
-                ResetPackets(missingCells);
-
-                missingCells = MapRouteWhile(routesSpecs, true);
-            }
-
-            if (missingCells.Any())
-            {
-                Write.Print($"{missingCells.Count} reach cell failed to get simple path");
-
-                routesSpecs = new List<Route.Specs>() { Route.Specs.Route, Route.Specs.All, Route.Specs.Alternative };
-                ResetPackets(missingCells);
-
-                missingCells = MapRouteWhile(routesSpecs, false);
-            }
+            return MapRouteWhile(routesSpecs, true).Distinct();
         }
 
         /// <summary>Print drones route to a text file</summary>
@@ -175,7 +168,8 @@
         /// <returns>score as int</returns>
         public int Score()
         {
-            IEnumerable<Drone> drones = from i in this.Drones where i.CurrentState == Drone.State.Stopped select i;
+            IEnumerable<Drone> drones = from i in this.Drones where i.Route != null select i;
+
             List<Route> routes = (from i in drones select i.Route).ToList();
 
             int movesNumber = (from i in routes select i.MovesCount).Sum();
@@ -269,14 +263,6 @@
             }
 
             return missingCells;
-        }
-
-        private void ResetPackets(IEnumerable<ICell> packets)
-        {
-            foreach (ICell cell in packets)
-            {
-                this.Grid.SetPacketState(cell, Packet.State.Pending);
-            }
         }
     }
 }

@@ -20,13 +20,13 @@
             route.AddCell(new RouteCell(8, 13, Drone.Direction.Right), delivery.Grid);
 
             StringBuilder actual = new StringBuilder();
-            actual.AppendLine(route.ToString());
+            actual.AppendLine(route?.ToString() ?? "null");
 
             StringBuilder expected = new StringBuilder();
             expected.AppendLine("StartCell:R4C16 ReachCell:R8C13 Cells:R5C16(Down);R6C16(Down);R7C16(Down);R8C16(Down);R8C15(Left);R8C14(Left);R8C13(Left);R8C12(Left);R8C13(Right) Packets:R8C12(8) MaxPackets:3 Distance:9");
             route.RemoveLastCell(delivery.Grid);
 
-            actual.AppendLine(route.ToString());
+            actual.AppendLine(route?.ToString() ?? "null");
             expected.AppendLine("StartCell:R4C16 ReachCell:R8C12 Cells:R5C16(Down);R6C16(Down);R7C16(Down);R8C16(Down);R8C15(Left);R8C14(Left);R8C13(Left);R8C12(Left) Packets:R8C12(8) MaxPackets:3 Distance:8");
 
             Assert.AreEqual(expected.ToString(), actual.ToString());
@@ -58,7 +58,7 @@
 
             actual.Append(gridPacket.CurrentState.ToString() + ";");
             actual.Append(gridPacket.Distance + ";");
-            actual.Append(currentRoute.ToString());
+            actual.Append(currentRoute?.ToString() ?? "null");
 
             Write.Trace($"{actual.ToString()}");
 

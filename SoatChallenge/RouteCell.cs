@@ -34,14 +34,20 @@
         /// <summary>Gets or sets cell direction from previous route cell</summary>
         public Drone.Direction Direction { get; set; }
 
+        /// <summary>Gets or sets a value indicating whether the packet is assigned</summary>
+        public bool IsAssigned { get; set; }
+
         /// <summary>Gets or sets a value indicating whether the cell does not cross grid routes (delimited by packets row and column)</summary>
         public bool IsFree { get; set; }
 
         /// <summary>Gets or sets a value indicating whether the cell contains a packet</summary>
         public bool IsPacket { get; set; }
 
-        /// <summary>Gets or sets a value indicating whether the routeCells belongs to grid routes (delimited by packets row and column)</summary>
+        /// <summary>Gets or sets a value indicating whether the routeCells belongs to grid routes (delimited by packets (+ startcell) row and column)</summary>
         public bool IsRoute { get; set; }
+
+        /// <summary>Gets or sets a value indicating whether the packet is planned to be delivered after route cell current distance</summary>
+        public bool WillBreakDelivery { get; set; }
 
         /// <summary>create a routeCell from a startcell</summary>
         /// <param name="cell">startcell as <see cref="Cell"/></param>

@@ -1,6 +1,7 @@
 ﻿namespace SoatChallenge
 {
     using System.Collections.Generic;
+    using System.Linq;
 
     /// <summary>Type representing a delivery drone</summary>
     public class Drone
@@ -73,7 +74,7 @@
         {
             get
             {
-                if (this.moves.Count > 0)
+                if (this.moves.Any())
                 {
                     return string.Join(" ", this.moves);
                 }
@@ -210,7 +211,7 @@
             }
             else
             {
-                this.moves.Add(0);
+                this.moves.Add((int)Drone.Direction.Stay);
             }
         }
 

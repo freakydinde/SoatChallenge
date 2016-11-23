@@ -74,7 +74,7 @@
             Delivery ndelivery = Delivery.CreateDelivery(Inputs.ExampleInput, 4, 10);
 
             Path path = new Path(new Cell(16, 7), ndelivery.Grid);
-            
+
             ndelivery.MapRoutes();
             ndelivery.Start();
 

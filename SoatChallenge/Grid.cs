@@ -126,17 +126,6 @@
             }
         }
 
-        /// <summary>Gets available packet according to distance</summary>
-        /// <param name="packet">input packet</param>
-        /// <param name="distance">input distance</param>
-        /// <returns>bool indicating whether packet is an available packet</returns>
-        public bool IsAvailablePacket(ICell packet, int distance)
-        {
-            IEnumerable<Packet> gridPackets = this.packets.Where(x => x.Row == packet.Row && x.Column == packet.Column && (x.CurrentState == Packet.State.Pending || x.Distance >= distance));
-
-            return gridPackets.Any();
-        }
-
         /// <summary>Gets a bool indicating if cell is out of route and packet</summary>
         /// <param name="cell">input cell</param>
         /// <returns>bool indicating whether this cell is free</returns>
@@ -165,7 +154,14 @@
         /// <returns>bool indicating whether this cell belong to a route</returns>
         public bool IsRoute(ICell cell)
         {
-            return this.packets.Where(x => x.Row == cell.Row || x.Column == cell.Column).Any();
+            if (cell.Row == StartCell.Row || cell.Column == StartCell.Column)
+            {
+                return true;
+            }
+            else
+            {
+                return this.packets.Where(x => x.Row == cell.Row || x.Column == cell.Column).Any();
+            }
         }
 
         /// <summary>Gets packet corresponding to packet</summary>
@@ -233,6 +229,24 @@
         public override string ToString()
         {
             return Write.Invariant($"Rows:{this.Rows} Columns:{this.Columns} StartCell:{this.StartCell} PacketNumber:{this.packets.Count()}");
+        }
+
+        /// <summary>Gets a boolean indicating whether distance allow to pass the cell without break delivery</summary>
+        /// <param name="packet">input packet</param>
+        /// <param name="distance">input distance</param>
+        /// <returns>bool indicating whether packet is an available cell</returns>
+        public bool WillBreakDelivery(ICell packet, int distance)
+        {
+            Packet testPacket = GetPacket(packet);
+
+            if (testPacket != null)
+            {
+                return (testPacket.Distance >= distance);
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

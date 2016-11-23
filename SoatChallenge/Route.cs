@@ -30,29 +30,23 @@
         [Flags]
         public enum Specs
         {
-            /// <summary>try to use route (delimited by column and row containing packets), try to catch packets, never use free (group 1)</summary>
+            /// <summary>try to use route (delimited by column and row (+ startcell) containing packets), try to catch packets, never use free (group 1)</summary>
             Route = 1,
 
-            /// <summary>try to go off routes, never take packets (group 1)</summary>
+            /// <summary>try to go off routes, never take pending or assigned packets (group 1)</summary>
             Free = 2,
 
-            /// <summary>use all cells to trace routes, never take packets (group 1)</summary>
+            /// <summary>use all cells to trace routes, never take pending or assigned packets (group 1)</summary>
             All = 4,
 
-            /// <summary>check for most close packet, reach it with a free route*, repeat action until packets max according distance is reach ° O o (group 1)</summary>
-            Bubble = 8,
-
             /// <summary>always select second choice when multiple path are available (default is choice 1) (group 2)</summary>
-            Alternative = 16,
+            Alternative = 8,
 
             /// <summary>use opposite horizontal side (which is a longer path) (group 2)</summary>
-            Opposite = 32,
+            Opposite = 16,
 
-            /// <summary>add a sleep round (at start) to delay cell passage so packet can be delivered from initial shipper (group 3)</summary>
-            Wait = 64,
-
-            /// <summary>return null if you can't follow "never" specs, if this flag is not set rules can be broken (group 3)</summary>
-            Pure = 128
+            /// <summary>add a sleep round (at start) to delay cell passage (so you can wait the initial shipper deliver its packets) (group 3)</summary>
+            Wait = 32
         }
 
         /// <summary>Gets a collection representing route cells</summary>
@@ -145,7 +139,6 @@
 
         /// <summary>Merge a route with this route</summary>
         /// <param name="route">route to merge</param>
-        /// <param name="bubbling">true : merge only Willing packet (bubble mode)</param>
         public void AddRoute(Route route)
         {
             if (route != null)

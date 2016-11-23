@@ -89,7 +89,6 @@
             route = path.MapRoute(Route.Specs.All);
 
             Write.Trace($"{Environment.NewLine} - - All ({path.Distance}) mdpping time : {timer.ElapsedMilliseconds} ms{Environment.NewLine}");
-            timer.Restart();
         }
 
         [TestMethod]
@@ -117,7 +116,8 @@
 
             string actual = route.ToString();
 
-            string expected = "StartCell:R4C16 ReachCell:R12C1 Cells:R5C16(Down);R6C16(Down);R7C16(Down);R7C15(Left);R7C14(Left);R7C13(Left);R8C13(Down);R8C12(Left);R9C12(Down);R9C13(Right);R10C13(Down);R11C13(Down);R11C14(Right);R11C15(Right);R11C16(Right);R12C16(Down);R13C16(Down);R14C16(Down);R14C17(Right);R13C17(Up);R13C18(Right);R13C19(Right);R13C0(Right);R12C0(Up);R12C1(Right) Packets:R8C12(8);R14C17(19);R12C1(25) MaxPackets:3 Distance:25";
+            string expected = "StartCell:R4C16 ReachCell:R12C1 Cells:R5C16(Down);R5C15(Left);R6C15(Down);R7C15(Down);R7C14(Left);R7C13(Left);R8C13(Down);R8C12(Left);R9C12(Down);R9C13(Right);R10C13(Down);R11C13(Down);R11C14(Right);R11C15(Right);R12C15(Down);R13C15(Down);R14C15(Down);R14C16(Right);R14C17(Right);R13C17(Up);R13C18(Right);R13C19(Right);R13C0(Right);R12C0(Up);R12C1(Right) Packets:R8C12(8);R14C17(19);R12C1(25) MaxPackets:3 Distance:25";
+
             Assert.AreEqual(expected, actual);
         }
 
@@ -129,21 +129,21 @@
 
             StringBuilder actual = new StringBuilder();
             Route route = path.MapRoute(Route.Specs.Free);
-            actual.AppendLine(($"{route}"));
+            actual.AppendLine(route?.ToString() ?? "null");
             route.Reset();
-            route = path.MapRoute(Route.Specs.Free | Route.Specs.Pure);
-            actual.AppendLine(($"{route}"));
+            route = path.MapRoute(Route.Specs.Free);
+            actual.AppendLine(route?.ToString() ?? "null");
             route.Reset();
             route = path.MapRoute(Route.Specs.Free | Route.Specs.Alternative);
-            actual.AppendLine(($"{route}"));
+            actual.AppendLine(route?.ToString() ?? "null");
             route.Reset();
             route = path.MapRoute(Route.Specs.Free | Route.Specs.Opposite);
-            actual.AppendLine(($"{route}"));
+            actual.AppendLine(route?.ToString() ?? "null");
 
             StringBuilder expected = new StringBuilder();
-            expected.AppendLine("StartCell:R4C16 ReachCell:R16C7 Cells:R5C16(Down);R6C16(Down);R7C16(Down);R7C15(Left);R7C14(Left);R7C13(Left);R8C13(Down);R9C13(Down);R10C13(Down);R11C13(Down);R12C13(Down);R13C13(Down);R14C13(Down);R15C13(Down);R16C13(Down);R16C12(Left);R16C11(Left);R16C10(Left);R16C9(Left);R16C8(Left);R16C7(Left) Packets:R16C7(21) MaxPackets:3 Distance:21");
-            expected.AppendLine("StartCell:R4C16 ReachCell:R16C7 Cells:R5C16(Down);R6C16(Down);R7C16(Down);R7C15(Left);R7C14(Left);R7C13(Left);R8C13(Down);R9C13(Down);R10C13(Down);R11C13(Down);R12C13(Down);R13C13(Down);R14C13(Down);R15C13(Down);R16C13(Down);R16C12(Left);R16C11(Left);R16C10(Left);R16C9(Left);R16C8(Left);R16C7(Left) Packets:R16C7(21) MaxPackets:3 Distance:21");
-            expected.AppendLine("StartCell:R4C16 ReachCell:R16C7 Cells:R4C15(Left);R4C14(Left);R4C13(Left);R5C13(Down);R6C13(Down);R7C13(Down);R7C12(Left);R7C11(Left);R7C10(Left);R7C9(Left);R7C8(Left);R7C7(Left);R8C7(Down);R9C7(Down);R10C7(Down);R11C7(Down);R12C7(Down);R13C7(Down);R14C7(Down);R15C7(Down);R16C7(Down) Packets:R16C7(21) MaxPackets:3 Distance:21");
+            expected.AppendLine("StartCell:R4C16 ReachCell:R16C7 Cells:R5C16(Down);R5C15(Left);R6C15(Down);R7C15(Down);R7C14(Left);R7C13(Left);R8C13(Down);R9C13(Down);R10C13(Down);R11C13(Down);R12C13(Down);R13C13(Down);R14C13(Down);R15C13(Down);R16C13(Down);R16C12(Left);R16C11(Left);R16C10(Left);R16C9(Left);R16C8(Left);R16C7(Left) Packets:R16C7(21) MaxPackets:3 Distance:21");
+            expected.AppendLine("StartCell:R4C16 ReachCell:R16C7 Cells:R5C16(Down);R5C15(Left);R6C15(Down);R7C15(Down);R7C14(Left);R7C13(Left);R8C13(Down);R9C13(Down);R10C13(Down);R11C13(Down);R12C13(Down);R13C13(Down);R14C13(Down);R15C13(Down);R16C13(Down);R16C12(Left);R16C11(Left);R16C10(Left);R16C9(Left);R16C8(Left);R16C7(Left) Packets:R16C7(21) MaxPackets:3 Distance:21");
+            expected.AppendLine("StartCell:R4C16 ReachCell:R16C7 Cells:R4C15(Left);R5C15(Down);R5C14(Left);R5C13(Left);R6C13(Down);R7C13(Down);R7C12(Left);R7C11(Left);R7C10(Left);R7C9(Left);R7C8(Left);R7C7(Left);R8C7(Down);R9C7(Down);R10C7(Down);R11C7(Down);R12C7(Down);R13C7(Down);R14C7(Down);R15C7(Down);R16C7(Down) Packets:R16C7(21) MaxPackets:3 Distance:21");
             expected.AppendLine("StartCell:R4C16 ReachCell:R16C7 Cells:R5C16(Down);R6C16(Down);R7C16(Down);R8C16(Down);R9C16(Down);R10C16(Down);R11C16(Down);R12C16(Down);R13C16(Down);R14C16(Down);R15C16(Down);R16C16(Down);R16C17(Right);R16C18(Right);R16C19(Right);R16C0(Right);R16C1(Right);R16C2(Right);R16C3(Right);R16C4(Right);R16C5(Right);R16C6(Right);R16C7(Right) Packets:R16C7(23) MaxPackets:3 Distance:23");
 
             Assert.AreEqual(expected.ToString(), actual.ToString());
@@ -156,23 +156,28 @@
             Path path = new Path(new Cell(16, 7), delivery.Grid);
 
             StringBuilder actual = new StringBuilder();
+
             Route route = path.MapRoute(Route.Specs.Route);
-            actual.AppendLine(($"{route}"));
-            route.Reset();
-            route = path.MapRoute(Route.Specs.Route | Route.Specs.Pure);
-            actual.AppendLine(($"{route}"));
-            // pure route return null so should be reset by herself
+            actual.AppendLine(route?.ToString() ?? "null");
+            route?.Reset();
+
+            route = path.MapRoute(Route.Specs.Free);
+            actual.AppendLine(route?.ToString() ?? "null");
+            route?.Reset();
+
             route = path.MapRoute(Route.Specs.Route | Route.Specs.Alternative);
-            actual.AppendLine(($"{route}"));
-            route.Reset();
+            actual.AppendLine(route?.ToString() ?? "null");
+            route?.Reset();
+
             route = path.MapRoute(Route.Specs.Route | Route.Specs.Opposite);
-            actual.AppendLine(($"{route}"));
+            actual.AppendLine(route?.ToString() ?? "null");
+            route?.Reset();
 
             StringBuilder expected = new StringBuilder();
-            expected.AppendLine("StartCell:R4C16 ReachCell:R16C7 Cells:R5C16(Down);R6C16(Down);R7C16(Down);R8C16(Down);R8C15(Left);R8C14(Left);R8C13(Left);R8C12(Left);R9C12(Down);R10C12(Down);R11C12(Down);R12C12(Down);R13C12(Down);R14C12(Down);R15C12(Down);R16C12(Down);R16C11(Left);R16C10(Left);R16C9(Left);R16C8(Left);R16C7(Left) Packets:R8C12(8);R16C7(21) MaxPackets:3 Distance:21");
-            expected.AppendLine();
-            expected.AppendLine("StartCell:R4C16 ReachCell:R16C7 Cells:R5C16(Down);R6C16(Down);R7C16(Down);R8C16(Down);R8C15(Left);R8C14(Left);R8C13(Left);R8C12(Left);R8C11(Left);R8C10(Left);R8C9(Left);R8C8(Left);R8C7(Left);R9C7(Down);R10C7(Down);R11C7(Down);R12C7(Down);R13C7(Down);R14C7(Down);R15C7(Down);R16C7(Down) Packets:R8C12(8);R16C7(21) MaxPackets:3 Distance:21");
-            expected.AppendLine("StartCell:R4C16 ReachCell:R16C7 Cells:R4C17(Right);R5C17(Down);R6C17(Down);R7C17(Down);R8C17(Down);R9C17(Down);R10C17(Down);R11C17(Down);R12C17(Down);R13C17(Down);R14C17(Down);R15C17(Down);R16C17(Down);R16C18(Right);R16C19(Right);R16C0(Right);R16C1(Right);R16C2(Right);R16C3(Right);R16C4(Right);R16C5(Right);R16C6(Right);R16C7(Right) Packets:R14C17(11);R16C7(23) MaxPackets:3 Distance:23");
+            expected.AppendLine("StartCell:R4C16 ReachCell:R16C7 Cells:R5C16(Down);R6C16(Down);R7C16(Down);R8C16(Down);R9C16(Down);R10C16(Down);R11C16(Down);R12C16(Down);R13C16(Down);R14C16(Down);R15C16(Down);R16C16(Down);R16C15(Left);R16C14(Left);R16C13(Left);R16C12(Left);R16C11(Left);R16C10(Left);R16C9(Left);R16C8(Left);R16C7(Left) Packets:R16C7(21) MaxPackets:3 Distance:21");
+            expected.AppendLine("StartCell:R4C16 ReachCell:R16C7 Cells:R5C16(Down);R5C15(Left);R6C15(Down);R7C15(Down);R7C14(Left);R7C13(Left);R8C13(Down);R9C13(Down);R10C13(Down);R11C13(Down);R12C13(Down);R13C13(Down);R14C13(Down);R15C13(Down);R16C13(Down);R16C12(Left);R16C11(Left);R16C10(Left);R16C9(Left);R16C8(Left);R16C7(Left) Packets:R16C7(21) MaxPackets:3 Distance:21");
+            expected.AppendLine("StartCell:R4C16 ReachCell:R16C7 Cells:R4C15(Left);R4C14(Left);R4C13(Left);R4C12(Left);R4C11(Left);R4C10(Left);R4C9(Left);R4C8(Left);R4C7(Left);R5C7(Down);R6C7(Down);R7C7(Down);R8C7(Down);R9C7(Down);R10C7(Down);R11C7(Down);R12C7(Down);R13C7(Down);R14C7(Down);R15C7(Down);R16C7(Down) Packets:R16C7(21) MaxPackets:3 Distance:21");
+            expected.AppendLine("StartCell:R4C16 ReachCell:R16C7 Cells:R5C16(Down);R6C16(Down);R7C16(Down);R8C16(Down);R9C16(Down);R10C16(Down);R11C16(Down);R12C16(Down);R13C16(Down);R14C16(Down);R14C17(Right);R15C17(Down);R16C17(Down);R16C18(Right);R16C19(Right);R16C0(Right);R16C1(Right);R16C2(Right);R16C3(Right);R16C4(Right);R16C5(Right);R16C6(Right);R16C7(Right) Packets:R14C17(11);R16C7(23) MaxPackets:3 Distance:23");
 
             Assert.AreEqual(expected.ToString(), actual.ToString());
         }

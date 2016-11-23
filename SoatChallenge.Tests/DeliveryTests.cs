@@ -51,12 +51,12 @@
 
             delivery.MapRoutes();
 
-            string actual = Write.Collection(delivery.Routes, ";");
+            string actual = Write.Collection(delivery.Routes, Environment.NewLine);
 
             StringBuilder expected = new StringBuilder();
-            expected.Append("StartCell:R4C16 ReachCell:R12C1 Cells:R3C16(Up);R2C16(Up);R2C17(Right);R2C18(Right);R2C19(Right);R2C0(Right);R2C1(Right);R2C2(Right);R3C2(Down);R4C2(Down);R5C2(Down);R6C2(Down);R7C2(Down);R8C2(Down);R9C2(Down);R10C2(Down);R11C2(Down);R12C2(Down);R12C1(Left) Packets:R2C2(8);R12C1(19) MaxPackets:2 Distance:19;");
-            expected.Append("StartCell:R4C16 ReachCell:R14C17 Cells:R5C16(Down);R6C16(Down);R7C16(Down);R7C15(Left);R7C14(Left);R7C13(Left);R8C13(Down);R8C12(Left);R9C12(Down);R9C13(Right);R10C13(Down);R11C13(Down);R11C14(Right);R11C15(Right);R11C16(Right);R12C16(Down);R13C16(Down);R14C16(Down);R14C17(Right) Packets:R8C12(8);R14C17(19) MaxPackets:2 Distance:19;");
-            expected.Append("StartCell:R4C16 ReachCell:R16C7 Cells:R5C16(Down);R6C16(Down);R7C16(Down);R7C15(Left);R7C14(Left);R7C13(Left);R8C13(Down);R9C13(Down);R10C13(Down);R11C13(Down);R12C13(Down);R13C13(Down);R14C13(Down);R15C13(Down);R16C13(Down);R16C12(Left);R16C11(Left);R16C10(Left);R16C9(Left);R16C8(Left);R16C7(Left) Packets:R16C7(21) MaxPackets:2 Distance:21");
+            expected.AppendLine("StartCell:R4C16 ReachCell:R12C1 Cells:R3C16(Up);R2C16(Up);R2C17(Right);R2C18(Right);R2C19(Right);R2C0(Right);R2C1(Right);R2C2(Right);R3C2(Down);R4C2(Down);R5C2(Down);R6C2(Down);R7C2(Down);R8C2(Down);R9C2(Down);R10C2(Down);R11C2(Down);R12C2(Down);R12C1(Left) Packets:R2C2(8);R12C1(19) MaxPackets:2 Distance:19");
+            expected.AppendLine("StartCell:R4C16 ReachCell:R14C17 Cells:R5C16(Down);R5C15(Left);R6C15(Down);R7C15(Down);R7C14(Left);R7C13(Left);R8C13(Down);R8C12(Left);R9C12(Down);R9C13(Right);R10C13(Down);R11C13(Down);R11C14(Right);R11C15(Right);R12C15(Down);R13C15(Down);R14C15(Down);R14C16(Right);R14C17(Right) Packets:R8C12(8);R14C17(19) MaxPackets:2 Distance:19");
+            expected.Append("StartCell:R4C16 ReachCell:R16C7 Cells:R5C16(Down);R5C15(Left);R6C15(Down);R7C15(Down);R7C14(Left);R7C13(Left);R8C13(Down);R9C13(Down);R10C13(Down);R11C13(Down);R12C13(Down);R13C13(Down);R14C13(Down);R15C13(Down);R16C13(Down);R16C12(Left);R16C11(Left);R16C10(Left);R16C9(Left);R16C8(Left);R16C7(Left) Packets:R16C7(21) MaxPackets:2 Distance:21");
 
             Assert.AreEqual(expected.ToString(), actual);
         }
@@ -80,8 +80,8 @@
 
             StringBuilder expected = new StringBuilder();
             expected.Append("2 2 2 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 1 0 0 0 0 0 0 0 0 0 0 0;");
-            expected.Append("2 4 4 4 1 1 1 4 1 4 3 4 4 3 3 3 4 4 4 3 0 0 0 0 0 0 0 0 0 0 0;");
-            expected.Append("1 4 4 4 1 1 1 4 4 4 4 4 4 4 4 4 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0;");
+            expected.Append("2 4 1 4 4 1 1 4 1 4 3 4 4 3 3 4 4 4 3 3 0 0 0 0 0 0 0 0 0 0 0;");
+            expected.Append("1 4 1 4 4 1 1 4 4 4 4 4 4 4 4 4 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0;");
             expected.Append("0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0;");
             expected.Append("score : 205");
 

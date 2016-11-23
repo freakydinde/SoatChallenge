@@ -27,11 +27,8 @@
             /// <summary>packet is assigned to a shipper</summary>
             Assigned = 3,
 
-            /// <summary>packet is delivering</summary>
-            Delivering = 4,
-
             /// <summary>packet is delivered</summary>
-            Delivered = 5,
+            Delivered = 4,
         }
 
         /// <summary>Gets current cell state</summary>

@@ -190,7 +190,7 @@
                 if (routeSpecs.HasFlag(Route.Specs.Route))
                 {
                     // return packet cells if available, otherwise route cells
-                    returnList = from i in nextDirections where i.IsPacket == true select i;
+                    returnList = from i in nextDirections where i.IsPacket == true && (i.IsAssigned == false || i.WillBreakDelivery == false) select i;
 
                     if (!returnList.Any())
                     {
@@ -204,42 +204,31 @@
 
                     if (!returnList.Any())
                     {
-                        returnList = from i in nextDirections where i.IsPacket == false select i;
+                        returnList = from i in nextDirections where i.IsPacket == false || (i.IsAssigned == true && i.WillBreakDelivery == false) select i;
                     }
                 }
                 else if (routeSpecs.HasFlag(Route.Specs.All))
                 {
                     // return all availables directions
-                    returnList = from i in nextDirections where i.IsPacket == false select i;
+                    returnList = from i in nextDirections where i.IsPacket == false || (i.IsAssigned == true && i.WillBreakDelivery == false) select i;
                 }
 
-                if (!routeSpecs.HasFlag(Route.Specs.Pure))
+                if ((returnList == null || !returnList.Any()) && routeSpecs.HasFlag(Route.Specs.Wait) == true)
                 {
-                    if (returnList == null || !returnList.Any())
+                    // insert a wait step on route start
+                    returnList = new List<RouteCell>() { RouteCell.WaitCell(this.StartCell) };
+                }
+                else
+                {
+                    if (routeSpecs.HasFlag(Route.Specs.Alternative) && returnList.Count() > 1)
                     {
-                        if (routeSpecs.HasFlag(Route.Specs.Wait) == true)
-                        {
-                            // insert a wait step on route start
-                            returnList = new List<RouteCell>() { RouteCell.WaitCell(this.StartCell) };
-                        }
-                        else
-                        {
-                            // Route | Free not following specs
-                            returnList = nextDirections.Distinct();
-                        }
+                        // Alternative
+                        returnList = returnList.Skip(1).Take(1);
                     }
                     else
                     {
-                        if (routeSpecs.HasFlag(Route.Specs.Alternative) && returnList.Count() > 1)
-                        {
-                            // Alternative
-                            returnList = returnList.Skip(1).Take(1);
-                        }
-                        else
-                        {
-                            // Route | Free | All | Bubble following specs
-                            returnList = returnList.Take(1);
-                        }
+                        // Route | Free | All | Bubble following specs
+                        returnList = returnList.Take(1);
                     }
                 }
 
@@ -275,11 +264,6 @@
                         {
                             routeSpecs &= ~Route.Specs.Route;
                             routeSpecs |= Route.Specs.Free;
-
-                            if (!routeSpecs.HasFlag(Route.Specs.Pure))
-                            {
-                                routeSpecs |= Route.Specs.Pure;
-                            }
                         }
                         else if (route.PacketsCount > route.MaxPackets)
                         {
@@ -344,8 +328,10 @@
 
                 if (cell.IsPacket)
                 {
-                    int nextDistance = route.Distance + 1;
-                    cell.IsPacket = this.Grid.IsAvailablePacket(cell, nextDistance);
+                    cell.IsAssigned = this.Grid.GetPacket(cell).CurrentState == Packet.State.Assigned;
+                    cell.WillBreakDelivery = this.Grid.WillBreakDelivery(cell, route.Distance + 1);
+
+                    Write.Trace($"cell {cell} is packet, assigned : {cell.IsAssigned}, will break delivery : {cell.WillBreakDelivery}");
                 }
 
                 if (cell.Row < 0 || cell.Row > this.Grid.Rows)

@@ -9,8 +9,6 @@
     internal class Program
     {
         private const int AutonomyRatio = 40;
-
-        // constante
         private const int DronesMaxPacket = 4;
 
         private static void Main()
@@ -40,7 +38,7 @@
         {
             Console.WriteLine();
 
-            IEnumerable<Route> routes = from i in delivery.Drones where i.CurrentState == Drone.State.Stopped && i.Route != null select i.Route;
+            IEnumerable<Route> routes = delivery.Routes;
             Write.Print($"route count : {routes.Count()}, average distance : {routes.Average(x => x.Distance)}, average packet count : {routes.Average(x => x.PacketsCount)}");
             File.WriteAllLines(Path.Combine(Environment.CurrentDirectory, "routes.txt"), from i in routes select i.ToString());
 
