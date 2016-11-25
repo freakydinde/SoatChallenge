@@ -25,7 +25,7 @@
                 this.Directions = this.PathDirections(this.StartCell, this.ReachCell);
             }
 
-            Write.Trace($"new Path : {this}");
+            // Write.Trace($"new Path : {this}");
         }
 
         /// <summary>Initializes a new instance of the <see cref="Path"/> class.</summary>
@@ -42,7 +42,7 @@
 
             this.Directions = this.PathDirections(this.StartCell, this.ReachCell);
 
-            Write.Trace($"new Path {this}");
+            // Write.Trace($"new Path {this}");
         }
 
         /// <summary>Gets path directions</summary>
@@ -151,9 +151,6 @@
             }
             else
             {
-                Write.Trace($"return null : route.PacketsCount < 0 {route}");
-
-                route.Reset();
                 return null;
             }
         }
@@ -184,7 +181,123 @@
             return Write.Invariant($"StartCell:{this.StartCell} ReachCell:{this.ReachCell} Distance:{this.Distance}");
         }
 
-        private RouteCell FilterAvailableDirections(IEnumerable<RouteCell> nextDirections, Route.Specs routeSpecs)
+        private List<RouteCell> AvailableDirections(Route route)
+        {
+            List<RouteCell> availableDirections = new List<RouteCell>();
+
+            // create list with available results
+            if (route.ReachCell.Row != this.ReachCell.Row)
+            {
+                availableDirections.Add(new RouteCell(route.ReachCell.Row - 1, route.ReachCell.Column, Drone.Direction.Up, route.Distance + 1, this.Grid));
+                availableDirections.Add(new RouteCell(route.ReachCell.Row + 1, route.ReachCell.Column, Drone.Direction.Down, route.Distance + 1, this.Grid));
+            }
+
+            if (route.ReachCell.Column != this.ReachCell.Column)
+            {
+                availableDirections.Add(new RouteCell(route.ReachCell.Row, route.ReachCell.Column - 1, Drone.Direction.Left, route.Distance + 1, this.Grid));
+                availableDirections.Add(new RouteCell(route.ReachCell.Row, route.ReachCell.Column + 1, Drone.Direction.Right, route.Distance + 1, this.Grid));
+            }
+
+            // flatten collection to iterate while removing item
+            IEnumerable<RouteCell> returnList = availableDirections.ToList();
+
+            foreach (RouteCell cell in returnList)
+            {
+                if (cell.Column < 0)
+                {
+                    cell.Column = Grid.Columns;
+                }
+                else if (cell.Column > Grid.Columns)
+                {
+                    cell.Column = 0;
+                }
+
+                if (cell.Row < 0 || cell.Row > this.Grid.Rows)
+                {
+                    // delete cells outside grid
+                    availableDirections.Remove(cell);
+                }
+                else if (cell.Row == this.StartCell.Row && cell.Column == this.StartCell.Column)
+                {
+                    // delete start cell
+                    availableDirections.Remove(cell);
+                }
+            }
+
+            return availableDirections;
+        }
+
+        // Ooii
+        private RouteCell DodgeCell(RouteCell packetCell, IEnumerable<RouteCell> nextDirections, ref Route route, Route.Specs routeSpecs)
+        {
+            Packet packet = this.Grid.GetPacket(packetCell);
+
+            IEnumerable<RouteCell> alternativeCells = from i in this.AvailableDirections(route) where !nextDirections.Where(x => x.Row != i.Row && x.Column != i.Column).Any() select i;
+
+            Write.Trace($"packet {packet} route.Distance + 1 {route.Distance + 1} - packet.Distance {packet.Distance}) > 2");
+
+            if (packet.Distance - (route.Distance + 1) > 2)
+            {
+                route.AddCell(packetCell, this.Grid);
+
+                RouteCell routeCell = NextDirection(route, Route.Specs.All);
+                RouteCell otherRouteCell = NextDirection(route, Route.Specs.All | Route.Specs.Alternative);
+
+                route.RemoveLastCell(this.Grid);
+
+                List<Path> paths = new List<Path>();
+
+                if (routeCell != null)
+                {
+                    paths.Add(new Path(routeCell, this.Grid, alternativeCells.ElementAt(0)));
+                    paths.Add(new Path(routeCell, this.Grid, alternativeCells.ElementAt(1)));
+                }
+
+                if (otherRouteCell != null)
+                {
+                    paths.Add(new Path(otherRouteCell, this.Grid, alternativeCells.ElementAt(0)));
+                    paths.Add(new Path(otherRouteCell, this.Grid, alternativeCells.ElementAt(1)));
+                }
+
+                if (paths.Any())
+                {
+                    List<Route> routes = new List<Route>();
+
+                    foreach (Path path in paths)
+                    {
+                        Route newRoute = path.MapRoute(new List<Route.Specs>() { Route.Specs.All, Route.Specs.All | Route.Specs.Alternative });
+
+                        if (newRoute != null)
+                        {
+                            routes.Add(newRoute);
+                        }
+                    }
+
+                    Route selectedRoute = (from i in routes orderby i.Distance select i).FirstOrDefault();
+
+                    if (selectedRoute != null)
+                    {
+                        route.AddRoute(selectedRoute);
+                        return NextDirection(route, routeSpecs);
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                // insert a wait step on route start
+                return RouteCell.WaitCell(this.StartCell);
+            }
+        }
+
+        private RouteCell FilterAvailableDirections(IEnumerable<RouteCell> nextDirections, Route route, Route.Specs routeSpecs)
         {
             IEnumerable<RouteCell> returnList = null;
 
@@ -194,16 +307,16 @@
                 if (routeSpecs.HasFlag(Route.Specs.Route))
                 {
                     // return packet cells if available, otherwise route cells
-                    returnList = from i in nextDirections where i.IsPacket == true && (i.IsAssigned == false || i.WillBreakDelivery == false) select i;
+                    returnList = from i in nextDirections where i.IsPacket == true && i.WillBreakDelivery == false select i;
 
                     if (!returnList.Any())
                     {
-                        returnList = from i in nextDirections where i.IsRoute == true select i;
+                        returnList = from i in nextDirections where i.IsRoute == true && i.IsPacket == false select i;
                     }
 
                     if (!returnList.Any())
                     {
-                        returnList = from i in nextDirections where i.IsStartRoute == true select i;
+                        returnList = from i in nextDirections where i.IsStartRoute == true && i.IsPacket == false select i;
                     }
                 }
                 else if (routeSpecs.HasFlag(Route.Specs.Free))
@@ -213,26 +326,36 @@
 
                     if (!returnList.Any())
                     {
-                        returnList = from i in nextDirections where i.IsPacket == false || (i.IsAssigned == true && i.WillBreakDelivery == false) select i;
+                        returnList = from i in nextDirections where i.IsPacket == false || i.WillBreakDelivery == false select i;
                     }
                 }
                 else if (routeSpecs.HasFlag(Route.Specs.All))
                 {
                     // return all availables directions
-                    returnList = from i in nextDirections where i.IsPacket == false || (i.IsAssigned == true && i.WillBreakDelivery == false) select i;
+                    returnList = from i in nextDirections where i.IsPacket == false || i.WillBreakDelivery == false select i;
                 }
 
-                if ((returnList == null || !returnList.Any()) && routeSpecs.HasFlag(Route.Specs.Wait) == true)
+                if ((returnList == null || !returnList.Any()) && (routeSpecs.HasFlag(Route.Specs.Dodge) == true || routeSpecs.HasFlag(Route.Specs.Wait)))
                 {
-                    // insert a wait step on route start
-                    returnList = new List<RouteCell>() { RouteCell.WaitCell(this.StartCell) };
+                    if (routeSpecs.HasFlag(Route.Specs.Dodge) == true)
+                    {
+                        RouteCell packetCell = (from i in nextDirections where i.WillBreakDelivery == true orderby i.Distance select i).FirstOrDefault();
+
+                        // try to dodge cell or wait if distance gap is lower than 3 step
+                        return this.DodgeCell(packetCell, nextDirections, ref route, routeSpecs);
+                    }
+                    else if (routeSpecs.HasFlag(Route.Specs.Wait))
+                    {
+                        // insert a wait step on route start
+                        return RouteCell.WaitCell(this.StartCell);
+                    }
                 }
                 else
                 {
                     if (routeSpecs.HasFlag(Route.Specs.Alternative) && returnList.Count() > 1)
                     {
                         // Alternative
-                        returnList = returnList.Skip(1).Take(1);
+                        returnList = returnList.Skip(1);
                     }
                     else
                     {
@@ -306,61 +429,21 @@
 
         private RouteCell NextDirection(Route route, Route.Specs routeSpecs)
         {
-            List<RouteCell> availableDirections = new List<RouteCell>();
-
-            // create list with available results
-            if (route.ReachCell.Row != this.ReachCell.Row)
-            {
-                availableDirections.Add(new RouteCell(route.ReachCell.Row - 1, route.ReachCell.Column, Drone.Direction.Up, this.Grid));
-                availableDirections.Add(new RouteCell(route.ReachCell.Row + 1, route.ReachCell.Column, Drone.Direction.Down, this.Grid));
-            }
-
-            if (route.ReachCell.Column != this.ReachCell.Column)
-            {
-                availableDirections.Add(new RouteCell(route.ReachCell.Row, route.ReachCell.Column - 1, Drone.Direction.Left, this.Grid));
-                availableDirections.Add(new RouteCell(route.ReachCell.Row, route.ReachCell.Column + 1, Drone.Direction.Right, this.Grid));
-            }
+            List<RouteCell> availableDirections = this.AvailableDirections(route);
 
             // flatten collection to iterate while removing item
             IEnumerable<RouteCell> returnList = availableDirections.ToList();
 
             foreach (RouteCell cell in returnList)
             {
-                if (cell.Column < 0)
-                {
-                    cell.Column = Grid.Columns;
-                }
-                else if (cell.Column > Grid.Columns)
-                {
-                    cell.Column = 0;
-                }
-
-                if (cell.IsPacket)
-                {
-                    cell.IsAssigned = this.Grid.GetPacket(cell).CurrentState == Packet.State.Assigned;
-                    cell.WillBreakDelivery = this.Grid.WillBreakDelivery(cell, route.Distance + 1);
-
-                    Write.Trace($"cell {cell} is packet, assigned : {cell.IsAssigned}, will break delivery : {cell.WillBreakDelivery}");
-                }
-
-                if (cell.Row < 0 || cell.Row > this.Grid.Rows)
-                {
-                    // delete cells outside grid
-                    availableDirections.Remove(cell);
-                }
-                else if (cell.Row == this.StartCell.Row && cell.Column == this.StartCell.Column)
-                {
-                    // delete start cell
-                    availableDirections.Remove(cell);
-                }
-                else if (cell.Row == this.ReachCell.Row && cell.Column == this.ReachCell.Column)
+                if (cell.Row == this.ReachCell.Row && cell.Column == this.ReachCell.Column)
                 {
                     // return reach cell only if available
                     Write.Trace($"reach cell is available direction : {cell}");
 
                     return cell;
                 }
-                else if (routeSpecs.HasFlag(Route.Specs.Opposite) && (cell.Direction != this.Directions.VerticalDirection && cell.Direction != this.Directions.HorizontalOpposite))
+                if (routeSpecs.HasFlag(Route.Specs.Opposite) && (cell.Direction != this.Directions.VerticalDirection && cell.Direction != this.Directions.HorizontalOpposite))
                 {
                     availableDirections.Remove(cell);
                 }
@@ -370,7 +453,7 @@
                 }
             }
 
-            return this.FilterAvailableDirections(availableDirections, routeSpecs);
+            return this.FilterAvailableDirections(availableDirections, route, routeSpecs);
         }
 
         private Directions PathDirections(ICell startCell, ICell reachCell)

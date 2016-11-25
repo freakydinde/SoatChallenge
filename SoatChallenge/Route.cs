@@ -45,8 +45,11 @@
             /// <summary>use opposite horizontal side (which is a longer path) (group 2)</summary>
             Opposite = 16,
 
-            /// <summary>add a sleep round (at start) to delay cell passage (so you can wait the initial shipper deliver its packets) (group 3)</summary>
-            Wait = 32
+            /// <summary>Dodge packet by by trying to get around or wait if wait time is less than 2 round (group 3)</summary>
+            Dodge = 32,
+
+            /// <summary>Dodge packet by adding a sleep round (at start) to delay cell passage or by trying to get around (group 3)</summary>
+            Wait = 64
         }
 
         /// <summary>Gets a collection representing route cells</summary>
@@ -218,11 +221,6 @@
             RouteCell cell = this.cells.Last();
 
             Write.Trace($"Removing cell : {cell}");
-
-            if (grid.ResetPacket(cell))
-            {
-                this.packets.Remove(this.packets.Last());
-            }
 
             this.cells.Remove(cell);
 

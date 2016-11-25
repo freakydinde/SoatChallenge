@@ -251,7 +251,8 @@
 
             if (testPacket != null)
             {
-                return testPacket.Distance >= distance;
+                // distance = don't break delivery, as previous route will act before this one
+                return testPacket.Distance > distance;
             }
             else
             {

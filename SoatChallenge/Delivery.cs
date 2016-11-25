@@ -45,7 +45,7 @@
         {
             get
             {
-                return from i in this.Drones select i.MoveString;
+                return from i in this.Drones orderby i.Id select i.MoveString;
             }
         }
 
@@ -63,7 +63,7 @@
         {
             get
             {
-                return this.Drones.Where(x => x.CurrentState == Drone.State.Pending);
+                return from i in this.Drones where i.CurrentState == Drone.State.Pending orderby i.Id select i;
             }
         }
 
@@ -127,40 +127,12 @@
         {
             List<Route.Specs> routesSpecs = new List<Route.Specs>()
             {
-                Route.Specs.Free,
+                Route.Specs.All,
                 Route.Specs.All | Route.Specs.Alternative,
-                Route.Specs.Free | Route.Specs.Wait,
-                Route.Specs.All | Route.Specs.Alternative | Route.Specs.Wait,
-                Route.Specs.Free | Route.Specs.Opposite,
-                Route.Specs.All | Route.Specs.Alternative | Route.Specs.Opposite,
-                Route.Specs.Free | Route.Specs.Opposite | Route.Specs.Wait,
-                Route.Specs.All | Route.Specs.Alternative | Route.Specs.Opposite | Route.Specs.Wait
+                Route.Specs.Free | Route.Specs.Wait
             };
 
-            // optimisation to get all drones delivering
-            if (this.PacketsNumber < this.Drones.Count() * Drone.MaxPackets)
-            {
-                while (this.PacketsNumber < this.Drones.Count() * Drone.MaxPackets)
-                {
-                    Drone.MaxPackets--;
-                }
-
-                int firstShot = (int)Math.Round((double)(this.PacketsNumber - (this.Drones.Count() * Drone.MaxPackets)) / Drone.MaxPackets, 0);
-
-                while ((firstShot * Drone.MaxPackets) + ((this.Drones.Count() - firstShot) * (Drone.MaxPackets + 1)) > this.PacketsNumber)
-                {
-                    firstShot++;
-                }
-
-                this.MapRouteWhile(routesSpecs, firstShot, true);
-
-                Drone.MaxPackets++;
-
-                Write.Print($"optimisation shot mapped {this.Routes.Count()} routes");
-            }
-
-            // standard behaviors
-            return this.MapRouteWhile(routesSpecs, 0, true);
+            return this.MapRouteWhile(routesSpecs, true);
         }
 
         /// <summary>Print drones route to a text file</summary>
@@ -172,7 +144,7 @@
                 File.Delete(outputFile);
             }
 
-            File.WriteAllLines(outputFile, from i in this.Drones select i.MoveString);
+            File.WriteAllLines(outputFile, this.DronesMoves);
         }
 
         /// <summary>reset delivery</summary>
@@ -196,17 +168,17 @@
 
             int movesNumber = (from i in routes select i.MovesCount).Sum();
 
-            int score = this.Grid.DeliveredPacketsNumber * ((this.MaxRound * drones.Count()) - movesNumber);
+            int score = this.Grid.DeliveredPacketsNumber * ((this.MaxRound * this.Drones.Count()) - movesNumber);
 
             if (this.Grid.DeliveredPacketsNumber == this.Grid.Packets.Count())
             {
                 score += this.Grid.Packets.Count() * 10;
 
-                Write.Print($"score:{score} = deliveredPacketNumber:{this.Grid.DeliveredPacketsNumber} * ((maxRound:{this.MaxRound} * dronesCount:{drones.Count()}) - movesCount:{movesNumber}) + bonus:Packets*10:{this.Grid.Packets.Count() * 10}");
+                Write.Print($"score:{score} = deliveredPacketNumber:{this.Grid.DeliveredPacketsNumber} * ((maxRound:{this.MaxRound} * dronesCount:{this.Drones.Count()}) - movesCount:{movesNumber}) + bonus:Packets*10:{this.Grid.Packets.Count() * 10}");
             }
             else
             {
-                Write.Print($"score:{score} = deliveredPacketNumber:{this.Grid.DeliveredPacketsNumber} * ((maxRound:{this.MaxRound} * dronesCount:{drones.Count()}) - movesCount:{movesNumber})");
+                Write.Print($"score:{score} = deliveredPacketNumber:{this.Grid.DeliveredPacketsNumber} * ((maxRound:{this.MaxRound} * dronesCount:{this.Drones.Count()}) - movesCount:{movesNumber})");
             }
 
             return score;
@@ -248,16 +220,16 @@
             return Write.Invariant($"PacketsNumber:{this.PacketsNumber} DronesNumber:{this.Drones.Count()} Round:{this.Round} MaxRound:{this.MaxRound} autonomyRatio:{Delivery.autonomyRatio} maxDistance:{Delivery.maxDistance} Drone.MaxPackets:{Drone.MaxPackets} Grid:({this.Grid})");
         }
 
-        private List<Cell> MapRouteWhile(List<Route.Specs> routesSpecs, int routesCountLimit, bool bubble)
+        private List<Cell> MapRouteWhile(List<Route.Specs> routesSpecs, bool bubble)
         {
-            if (routesCountLimit == 0)
+            if (bubble)
             {
-                routesCountLimit = this.PacketsNumber;
+                Write.Print($"° O o bubbling o O °");
             }
 
             List<Cell> missingCells = new List<Cell>();
 
-            while (this.Grid.PendingPacketsNumber > 0 && this.PendingDrones.Count() > 0 && routesCountLimit > 0)
+            while (this.Grid.PendingPacketsNumber > 0 && this.PendingDrones.Count() > 0)
             {
                 Path path = new Path(this.Grid.StartCell, this.Grid);
 
@@ -275,8 +247,6 @@
                 if (route != null)
                 {
                     this.PendingDrones.FirstOrDefault()?.SetRoute(route);
-                    routesCountLimit--;
-
                     Write.Print($"route mapped : {this.Routes.Count()}, packet assigned : {this.Grid.AssignedPacketsNumber} packets left : {this.Grid.PendingPacketsNumber} missing cells : {missingCells.Count()}, drone left : {this.PendingDrones.Count()}");
                 }
                 else

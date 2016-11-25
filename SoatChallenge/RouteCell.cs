@@ -10,18 +10,18 @@
         public RouteCell(int row, int column, Drone.Direction direction) : base(row, column)
         {
             this.Direction = direction;
+            this.Distance = 0;
         }
 
         /// <summary>Initializes a new instance of the <see cref="RouteCell"/> class.</summary>
         /// <param name="row">Cell row position</param>
         /// <param name="column">Cell column position</param>
         /// <param name="direction">route cell direction</param>
+        /// <param name="distance">route cell distance</param>
         /// <param name="grid">grid owner of this route</param>
-        public RouteCell(int row, int column, Drone.Direction direction, Grid grid) : this(row, column, direction)
+        public RouteCell(int row, int column, Drone.Direction direction, int distance, Grid grid) : this(row, column, direction)
         {
-            this.IsPacket = false;
-            this.IsRoute = false;
-            this.IsFree = false;
+            this.Distance = distance;
 
             if (grid != null)
             {
@@ -29,14 +29,23 @@
                 this.IsRoute = grid.IsRoute(this);
                 this.IsFree = grid.IsFree(this);
                 this.IsStartRoute = grid.IsStartRoute(this);
+
+                if (this.IsPacket)
+                {
+                    this.WillBreakDelivery = grid.WillBreakDelivery(this, this.Distance);
+                }
+                else
+                {
+                    this.WillBreakDelivery = false;
+                }
             }
         }
 
         /// <summary>Gets or sets cell direction from previous route cell</summary>
         public Drone.Direction Direction { get; set; }
 
-        /// <summary>Gets or sets a value indicating whether the packet is assigned</summary>
-        public bool IsAssigned { get; set; }
+        /// <summary>Gets or sets route cell distance</summary>
+        public int Distance { get; set; }
 
         /// <summary>Gets or sets a value indicating whether the cell does not cross grid routes (delimited by packets row and column)</summary>
         public bool IsFree { get; set; }
