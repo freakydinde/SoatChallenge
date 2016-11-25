@@ -92,10 +92,8 @@
         }
 
         [TestMethod]
-        public void RouteDodge()
+        public void RouteWait()
         {
-            // new dodge mode work, now test fail ? no more time to fix
-
             string editedExampleFile = System.IO.Path.Combine(Environment.CurrentDirectory, "newExample.txt");
 
             if (System.IO.File.Exists(editedExampleFile))
@@ -136,7 +134,7 @@
 
             Path path = new Path(new Cell(16, 7), delivery.Grid, new Cell(8, 13));
 
-            Route route = path.MapRoute(Route.Specs.All | Route.Specs.Dodge);
+            Route route = path.MapRoute(Route.Specs.All | Route.Specs.Wait);
 
             string actual = route.ToString();
 

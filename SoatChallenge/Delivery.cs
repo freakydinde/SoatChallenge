@@ -127,11 +127,13 @@
         {
             List<Route.Specs> routesSpecs = new List<Route.Specs>()
             {
-                Route.Specs.All,
+                Route.Specs.Free,
+                Route.Specs.Free | Route.Specs.Alternative,
                 Route.Specs.All | Route.Specs.Alternative,
-                Route.Specs.Free | Route.Specs.Wait
+                Route.Specs.Route | Route.Specs.Dodge,
+                Route.Specs.Route | Route.Specs.Wait,
             };
-
+            
             return this.MapRouteWhile(routesSpecs, true);
         }
 
@@ -224,7 +226,7 @@
         {
             if (bubble)
             {
-                Write.Print($"° O o bubbling o O °");
+                Write.Print($"° bubble o O");
             }
 
             List<Cell> missingCells = new List<Cell>();
