@@ -133,7 +133,7 @@
                 Route.Specs.Route | Route.Specs.Dodge,
                 Route.Specs.Route | Route.Specs.Wait,
             };
-            
+
             return this.MapRouteWhile(routesSpecs, true);
         }
 

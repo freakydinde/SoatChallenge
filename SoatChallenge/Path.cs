@@ -240,10 +240,10 @@
             {
                 route.AddCell(packetCell, this.Grid);
 
-                RouteCell routeCell = NextDirection(route, Route.Specs.All);
-                RouteCell otherRouteCell = NextDirection(route, Route.Specs.All | Route.Specs.Alternative);
+                RouteCell routeCell = this.NextDirection(route, Route.Specs.All);
+                RouteCell otherRouteCell = this.NextDirection(route, Route.Specs.All | Route.Specs.Alternative);
 
-                route.RemoveLastCell(this.Grid);
+                route.RemoveLastCell();
 
                 List<Path> paths = new List<Path>();
 
@@ -278,7 +278,7 @@
                     if (selectedRoute != null)
                     {
                         route.AddRoute(selectedRoute);
-                        return NextDirection(route, routeSpecs);
+                        return this.NextDirection(route, routeSpecs);
                     }
                     else
                     {
@@ -443,6 +443,7 @@
 
                     return cell;
                 }
+
                 if (routeSpecs.HasFlag(Route.Specs.Opposite) && (cell.Direction != this.Directions.VerticalDirection && cell.Direction != this.Directions.HorizontalOpposite))
                 {
                     availableDirections.Remove(cell);

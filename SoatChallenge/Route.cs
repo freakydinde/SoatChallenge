@@ -215,8 +215,7 @@
         }
 
         /// <summary>remove last cell of route cells list</summary>
-        /// <param name="grid">grid containing cell</param>
-        public void RemoveLastCell(Grid grid)
+        public void RemoveLastCell()
         {
             RouteCell cell = this.cells.Last();
 

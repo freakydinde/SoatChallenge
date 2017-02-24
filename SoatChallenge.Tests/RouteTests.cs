@@ -24,7 +24,7 @@
 
             StringBuilder expected = new StringBuilder();
             expected.AppendLine("StartCell:R4C16 ReachCell:R8C13 Cells:R5C16(Down);R6C16(Down);R7C16(Down);R8C16(Down);R8C15(Left);R8C14(Left);R8C13(Left);R8C12(Left);R8C13(Right) Packets:R8C12(8) MaxPackets:3 Distance:9");
-            route.RemoveLastCell(delivery.Grid);
+            route.RemoveLastCell();
 
             actual.AppendLine(route?.ToString() ?? "null");
             expected.AppendLine("StartCell:R4C16 ReachCell:R8C12 Cells:R5C16(Down);R6C16(Down);R7C16(Down);R8C16(Down);R8C15(Left);R8C14(Left);R8C13(Left);R8C12(Left) Packets:R8C12(8) MaxPackets:3 Distance:8");

@@ -67,7 +67,7 @@
                 paths.Add(new Path(cell, ndelivery.Grid));
             }
 
-            Write.Trace($"{Environment.NewLine} - - mdpping all path :{timer.ElapsedMilliseconds} ms{Environment.NewLine}");
+            Write.Trace($"{Environment.NewLine} - - mapping all path :{timer.ElapsedMilliseconds} ms{Environment.NewLine}");
 
             // get farthest packet, should be distance 726
             Path path = paths.OrderByDescending(x => x.Distance).Take(1).First();
@@ -77,71 +77,18 @@
             Route route = path.MapRoute(Route.Specs.Route);
             route?.Reset();
 
-            Write.Trace($"{Environment.NewLine} - - Route ({path.Distance}) mdpping time :{timer.ElapsedMilliseconds} ms{Environment.NewLine}");
+            Write.Trace($"{Environment.NewLine} - - Route ({path.Distance}) mapping time :{timer.ElapsedMilliseconds} ms{Environment.NewLine}");
             timer.Restart();
 
             route = path.MapRoute(Route.Specs.Free);
             route?.Reset();
 
-            Write.Trace($"{Environment.NewLine} - - Free ({path.Distance}) mdpping time :{timer.ElapsedMilliseconds} ms{Environment.NewLine}");
+            Write.Trace($"{Environment.NewLine} - - Free ({path.Distance}) mapping time :{timer.ElapsedMilliseconds} ms{Environment.NewLine}");
             timer.Restart();
 
             route = path.MapRoute(Route.Specs.All);
 
-            Write.Trace($"{Environment.NewLine} - - All ({path.Distance}) mdpping time :{timer.ElapsedMilliseconds} ms{Environment.NewLine}");
-        }
-
-        [TestMethod]
-        public void RouteWait()
-        {
-            string editedExampleFile = System.IO.Path.Combine(Environment.CurrentDirectory, "newExample.txt");
-
-            if (System.IO.File.Exists(editedExampleFile))
-            {
-                System.IO.File.Delete(editedExampleFile);
-            }
-
-            System.IO.File.Copy(Inputs.ExampleInput, editedExampleFile);
-            System.IO.File.AppendAllText(editedExampleFile, $"{Environment.NewLine}9 13{Environment.NewLine}9 12{Environment.NewLine}8 11");
-
-            Delivery delivery = Delivery.CreateDelivery(editedExampleFile, 4, 10);
-
-            Cell pack1 = new Cell(8, 11);
-            Cell pack2 = new Cell(8, 12);
-            Cell pack3 = new Cell(9, 12);
-            Cell pack4 = new Cell(9, 13);
-
-            Packet pa = delivery.Grid.GetPacket(pack2);
-            delivery.Grid.SetPacketState(pack2, Packet.State.Assigned);
-            delivery.Grid.SetPacketDistance(pack2, 0);
-
-            Packet pb = delivery.Grid.GetPacket(pack4);
-            delivery.Grid.SetPacketState(pack4, Packet.State.Assigned);
-            delivery.Grid.SetPacketDistance(pack4, 5);
-
-            Packet pc = delivery.Grid.GetPacket(pack3);
-            delivery.Grid.SetPacketState(pack3, Packet.State.Assigned);
-            delivery.Grid.SetPacketDistance(pack3, 5);
-
-            Packet pd = delivery.Grid.GetPacket(pack1);
-            delivery.Grid.SetPacketState(pack1, Packet.State.Assigned);
-            delivery.Grid.SetPacketDistance(pack1, 5);
-
-            Write.Trace($"{pa}, state :{pa.CurrentState}");
-            Write.Trace($"{pb}, state :{pb.CurrentState}");
-            Write.Trace($"{pc}, state :{pc.CurrentState}");
-            Write.Trace($"{pd}, state :{pd.CurrentState}");
-
-            Path path = new Path(new Cell(16, 7), delivery.Grid, new Cell(8, 13));
-
-            Route route = path.MapRoute(Route.Specs.All | Route.Specs.Wait);
-
-            string actual = route.ToString();
-
-            Write.Trace(actual);
-
-            string expected = "StartCell:R8C13 ReachCell:R16C7 Cells:R8C13(Stay);R8C13(Stay);R8C13(Stay);R8C12(Left);R9C12(Down);R10C12(Down);R11C12(Down);R12C12(Down);R13C12(Down);R14C12(Down);R15C12(Down);R16C12(Down);R16C11(Left);R16C10(Left);R16C9(Left);R16C8(Left);R16C7(Left) Packets:R16C7(17) MaxPackets:4 Distance:17";
-            Assert.AreEqual(expected, actual);
+            Write.Trace($"{Environment.NewLine} - - All ({path.Distance}) mapping time :{timer.ElapsedMilliseconds} ms{Environment.NewLine}");
         }
 
         [TestMethod]
@@ -238,6 +185,59 @@
             Write.Trace(actual.ToString());
 
             Assert.AreEqual(expected.ToString(), actual.ToString());
+        }
+
+        [TestMethod]
+        public void RouteWait()
+        {
+            string editedExampleFile = System.IO.Path.Combine(Environment.CurrentDirectory, "newExample.txt");
+
+            if (System.IO.File.Exists(editedExampleFile))
+            {
+                System.IO.File.Delete(editedExampleFile);
+            }
+
+            System.IO.File.Copy(Inputs.ExampleInput, editedExampleFile);
+            System.IO.File.AppendAllText(editedExampleFile, $"{Environment.NewLine}9 13{Environment.NewLine}9 12{Environment.NewLine}8 11");
+
+            Delivery delivery = Delivery.CreateDelivery(editedExampleFile, 4, 10);
+
+            Cell pack1 = new Cell(8, 11);
+            Cell pack2 = new Cell(8, 12);
+            Cell pack3 = new Cell(9, 12);
+            Cell pack4 = new Cell(9, 13);
+
+            Packet pa = delivery.Grid.GetPacket(pack2);
+            delivery.Grid.SetPacketState(pack2, Packet.State.Assigned);
+            delivery.Grid.SetPacketDistance(pack2, 0);
+
+            Packet pb = delivery.Grid.GetPacket(pack4);
+            delivery.Grid.SetPacketState(pack4, Packet.State.Assigned);
+            delivery.Grid.SetPacketDistance(pack4, 5);
+
+            Packet pc = delivery.Grid.GetPacket(pack3);
+            delivery.Grid.SetPacketState(pack3, Packet.State.Assigned);
+            delivery.Grid.SetPacketDistance(pack3, 5);
+
+            Packet pd = delivery.Grid.GetPacket(pack1);
+            delivery.Grid.SetPacketState(pack1, Packet.State.Assigned);
+            delivery.Grid.SetPacketDistance(pack1, 5);
+
+            Write.Trace($"{pa}, state :{pa.CurrentState}");
+            Write.Trace($"{pb}, state :{pb.CurrentState}");
+            Write.Trace($"{pc}, state :{pc.CurrentState}");
+            Write.Trace($"{pd}, state :{pd.CurrentState}");
+
+            Path path = new Path(new Cell(16, 7), delivery.Grid, new Cell(8, 13));
+
+            Route route = path.MapRoute(Route.Specs.All | Route.Specs.Wait);
+
+            string actual = route.ToString();
+
+            Write.Trace(actual);
+
+            string expected = "StartCell:R8C13 ReachCell:R16C7 Cells:R8C13(Stay);R8C13(Stay);R8C13(Stay);R8C12(Left);R9C12(Down);R10C12(Down);R11C12(Down);R12C12(Down);R13C12(Down);R14C12(Down);R15C12(Down);R16C12(Down);R16C11(Left);R16C10(Left);R16C9(Left);R16C8(Left);R16C7(Left) Packets:R16C7(17) MaxPackets:4 Distance:17";
+            Assert.AreEqual(expected, actual);
         }
     }
 }
